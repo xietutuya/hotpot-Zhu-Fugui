@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>朱富贵火锅计算器 · 智能计价助手</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #fef7e8;
+            font-family: system-ui, 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px 16px 40px;
+            color: #2d2418;
+        }
+
+        /* 主容器卡片 */
+        .calculator {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding: 24px 20px 32px;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            background: linear-gradient(135deg, #d6401f, #f5a623);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-block;
+        }
+
+        .sub {
+            color: #b45a3b;
+            font-size: 0.85rem;
+            border-left: 3px solid #f5a623;
+            padding-left: 10px;
+            margin: 8px 0 20px 0;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* 分区卡片 */
+        .section {
+            background: #fffaf3;
+            border-radius: 28px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid #ffe6d0;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            color: #c2410c;
+            border-left: 4px solid #f5a623;
+            padding-left: 12px;
+        }
+
+        .section-title i {
+            font-size: 1.2rem;
+        }
+
+        /* 锅底 row */
+        .soup-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 8px;
+        }
+
+        .soup-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff2e6;
+            padding: 8px 16px;
+            border-radius: 40px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .soup-option input {
+            width: 20px;
+            height: 20px;
+            accent-color: #f5a623;
+            margin: 0;
+        }
+
+        .soup-option label {
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .soup-price {
+            margin-left: auto;
+            font-weight: 600;
+            color: #d64b2c;
+        }
+
+        /* 人数调料 */
+        .people-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .people-label {
+            font-weight: 500;
+            background: #feeedf;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+        }
+        .people-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border-radius: 50px;
+            padding: 4px 12px;
+            border: 1px solid #ffd7b5;
+        }
+        .people-input input {
+            width: 70px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            outline: none;
+            padding: 8px 0;
+            background: transparent;
+        }
+        .people-input span {
+            font-size: 0.9rem;
+            color: #a8653a;
+        }
+
+        /* 折扣切换双按钮 */
+        .discount-switch {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #f3ede5;
+            padding: 6px;
+            border-radius: 60px;
+        }
+        .discount-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            color: #9b6a45;
+            letter-spacing: 1px;
+        }
+        .discount-btn.active {
+            background: #ffffff;
+            color: #db4d2b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 0.5px solid #ffe0bf;
+        }
+
+        /* 盘子列表 网格 */
+        .plates-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 6px;
+        }
+        .plate-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff5ec;
+            border-radius: 60px;
+            padding: 8px 16px 8px 20px;
+            border: 1px solid #ffe0c0;
+        }
+        .plate-info {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .plate-color {
+            font-weight: 800;
+            font-size: 1.2rem;
+            width: 48px;
+            letter-spacing: 1px;
+        }
+        .green { color: #3a7b4b; }
+        .yellow { color: #cb8b2c; }
+        .red { color: #dc4c2c; }
+        .iron { color: #6f5b47; }
+        .plate-price {
+            font-weight: 600;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: #b45a2b;
+        }
+        .plate-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border-radius: 50px;
+            padding: 4px 10px;
+        }
+        .plate-ctrl button {
+            background: #ffede0;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #c25d3a;
+            transition: 0.1s;
+        }
+        .plate-ctrl button:active { background: #f3d5be; transform: scale(0.96);}
+        .plate-ctrl span {
+            min-width: 32px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* 饮料区域 */
+        .beverage-list {
+            margin: 12px 0 10px;
+        }
+        .drink-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fffcf7;
+            padding: 10px 12px;
+            border-radius: 44px;
+            margin-bottom: 10px;
+            border: 1px solid #ffebdb;
+        }
+        .drink-name {
+            flex: 3;
+            border: none;
+            background: #fff3e9;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            outline: none;
+            font-weight: 500;
+        }
+        .drink-price {
+            flex: 1.5;
+            border: none;
+            background: #fff3e9;
+            padding: 8px 8px;
+            border-radius: 30px;
+            text-align: center;
+            font-weight: 500;
+            outline: none;
+        }
+        .del-drink {
+            background: #ffe1d0;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #bc5638;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .add-drink-btn {
+            background: #f5e6db;
+            border: 1px dashed #d6a87a;
+            width: 100%;
+            padding: 12px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #ba6e3e;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .add-drink-btn:active { background: #efdbc9; }
+
+        /* 总价卡片 */
+        .total-area {
+            background: #2d2418;
+            border-radius: 34px;
+            padding: 18px 24px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            color: #ffeedd;
+        }
+        .total-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        .total-price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #f7bc45;
+        }
+        .reset-btn {
+            background: #3f2e21;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            color: #ffcf9a;
+            font-weight: 500;
+            margin-top: 16px;
+            width: 100%;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .reset-btn:active { background: #5c4330; }
+
+        hr {
+            margin: 12px 0;
+            border-color: #ffe0cb;
+        }
+        .note {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #b98862;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <h1>🥘 朱富贵火锅计算器</h1>
+    <div class="sub">模式1 · 锅底 + 盘子 + 饮料 智能算账</div>
+
+    <!-- 锅底区域 -->
+    <div class="section">
+        <div class="section-title">🍲 选锅底</div>
+        <div class="soup-group">
+            <div class="soup-option">
+                <input type="radio" name="soupBase" id="soupNormal" value="normal" checked>
+                <label for="soupNormal">🔥 普通锅底</label>
+                <span class="soup-price">¥12</span>
+            </div>
+            <div class="soup-option">
+                <input type="radio" name="soupBase" id="soupClear" value="clear">
+                <label for="soupClear">🥬 清汤锅底</label>
+                <span class="soup-price">¥6</span>
+            </div>
+        </div>
+        <div class="people-area">
+            <div class="people-label">🧂 调料费 (4元/人)</div>
+            <div class="people-input">
+                <input type="number" id="peopleNum" value="1" min="0" step="1">
+                <span>人</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 折扣切换区 + 盘子计价 (动态单价跟随折扣) -->
+    <div class="section">
+        <div class="section-title">🥘 盘子专区 · 折扣单价</div>
+        <div class="discount-switch" id="discountSwitch">
+            <div class="discount-btn active" data-discount="68">🔥 68折 狂欢</div>
+            <div class="discount-btn" data-discount="58">✨ 58折 超值</div>
+        </div>
+
+        <div class="plates-grid" id="platesContainer">
+            <!-- 动态数据绑定，但结构写好，js控制单价和数量 -->
+            <div class="plate-item" data-plate="green">
+                <div class="plate-info">
+                    <span class="plate-color green">🥬 绿盘</span>
+                    <span class="plate-price" id="priceGreen">3.4</span>
+                </div>
+                <div class="plate-ctrl">
+                    <button class="dec-btn" data-type="green">−</button>
+                    <span id="countGreen">0</span>
+                    <button class="inc-btn" data-type="green">+</button>
+                </div>
+            </div>
+            <div class="plate-item" data-plate="yellow">
+                <div class="plate-info">
+                    <span class="plate-color yellow">🌽 黄盘</span>
+                    <span class="plate-price" id="priceYellow">6.8</span>
+                </div>
+                <div class="plate-ctrl">
+                    <button class="dec-btn" data-type="yellow">−</button>
+                    <span id="countYellow">0</span>
+                    <button class="inc-btn" data-type="yellow">+</button>
+                </div>
+            </div>
+            <div class="plate-item" data-plate="red">
+                <div class="plate-info">
+                    <span class="plate-color red">🦐 红盘</span>
+                    <span class="plate-price" id="priceRed">10.2</span>
+                </div>
+                <div class="plate-ctrl">
+                    <button class="dec-btn" data-type="red">−</button>
+                    <span id="countRed">0</span>
+                    <button class="inc-btn" data-type="red">+</button>
+                </div>
+            </div>
+            <div class="plate-item" data-plate="iron">
+                <div class="plate-info">
+                    <span class="plate-color iron">⚙️ 铁盘</span>
+                    <span class="plate-price" id="priceIron">14.96</span>
+                </div>
+                <div class="plate-ctrl">
+                    <button class="dec-btn" data-type="iron">−</button>
+                    <span id="countIron">0</span>
+                    <button class="inc-btn" data-type="iron">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 饮料区 动态添加 -->
+    <div class="section">
+        <div class="section-title">🧃 饮料 · 随心加</div>
+        <div id="beverageList" class="beverage-list">
+            <!-- 预设一杯可乐示例 -->
+            <div class="drink-item" data-drink-id="1">
+                <input type="text" class="drink-name" placeholder="饮料名称" value="🥤 可乐">
+                <input type="number" class="drink-price" placeholder="价格" value="5.0" step="0.5">
+                <button class="del-drink">✕</button>
+            </div>
+            <div class="drink-item" data-drink-id="2">
+                <input type="text" class="drink-name" placeholder="饮料名称" value="🍺 青岛啤酒">
+                <input type="number" class="drink-price" placeholder="价格" value="12.0" step="0.5">
+                <button class="del-drink">✕</button>
+            </div>
+        </div>
+        <button id="addDrinkBtn" class="add-drink-btn">+ 添加饮料</button>
+    </div>
+
+    <!-- 总价与重置 -->
+    <div class="total-area">
+        <span class="total-label">💰 合计金额</span>
+        <span class="total-price" id="totalAmount">0.00</span>
+    </div>
+    <button id="resetAllBtn" class="reset-btn">🔄 重置所有数据</button>
+    <div class="note">＊ 盘子价格已按所选折扣计算 | 锅底+调料费+饮料不参与菜品折扣</div>
+</div>
+
+<script>
+    // ---------- 价格定义 ----------
+    // 68折 盘子单价配置 (根据原价 5/10/15/22 乘以0.68)
+    const DISCOUNT_68 = {
+        green: 3.4,
+        yellow: 6.8,
+        red: 10.2,
+        iron: 14.96
+    };
+    // 58折 盘子单价 (原价5/10/15/22 *0.58 精确两位)
+    const DISCOUNT_58 = {
+        green: 2.90,
+        yellow: 5.80,
+        red: 8.70,
+        iron: 12.76
+    };
+
+    let currentDiscount = '68';   // '68' 或 '58'
+    // 盘子数量状态存储
+    let plateCounts = {
+        green: 0,
+        yellow: 0,
+        red: 0,
+        iron: 0
+    };
+
+    // DOM 元素
+    const soupNormalRadio = document.getElementById('soupNormal');
+    const soupClearRadio = document.getElementById('soupClear');
+    const peopleInput = document.getElementById('peopleNum');
+    const totalSpan = document.getElementById('totalAmount');
+
+    // 盘子单价显示区
+    const priceGreenSpan = document.getElementById('priceGreen');
+    const priceYellowSpan = document.getElementById('priceYellow');
+    const priceRedSpan = document.getElementById('priceRed');
+    const priceIronSpan = document.getElementById('priceIron');
+
+    // 盘子数量显示span
+    const countGreenSpan = document.getElementById('countGreen');
+    const countYellowSpan = document.getElementById('countYellow');
+    const countRedSpan = document.getElementById('countRed');
+    const countIronSpan = document.getElementById('countIron');
+
+    // 折扣按钮
+    const discountBtns = document.querySelectorAll('.discount-btn');
+    // 饮料容器
+    const beverageContainer = document.getElementById('beverageList');
+    const addDrinkBtn = document.getElementById('addDrinkBtn');
+    const resetBtn = document.getElementById('resetAllBtn');
+
+    // 辅助函数：更新界面上的盘子单价 (根据当前折扣)
+    function updatePlatePriceDisplays() {
+        const prices = currentDiscount === '68' ? DISCOUNT_68 : DISCOUNT_58;
+        priceGreenSpan.innerText = prices.green.toFixed(2);
+        priceYellowSpan.innerText = prices.yellow.toFixed(2);
+        priceRedSpan.innerText = prices.red.toFixed(2);
+        priceIronSpan.innerText = prices.iron.toFixed(2);
+    }
+
+    // 获取当前折扣下的盘子单价对象
+    function getCurrentPlatePrices() {
+        return currentDiscount === '68' ? DISCOUNT_68 : DISCOUNT_58;
+    }
+
+    // 计算总价核心逻辑
+    function computeTotal() {
+        // 1. 锅底费用
+        let soupPrice = 0;
+        if (soupNormalRadio.checked) soupPrice = 12;
+        else if (soupClearRadio.checked) soupPrice = 6;
+        
+        // 2. 调料费：人数 * 4
+        let peopleCnt = parseInt(peopleInput.value, 10);
+        if (isNaN(peopleCnt) || peopleCnt < 0) peopleCnt = 0;
+        const seasoningFee = peopleCnt * 4;
+        
+        // 3. 盘子费用 (数量 * 当前折扣单价)
+        const platePrices = getCurrentPlatePrices();
+        let platesTotal = 0;
+        platesTotal += plateCounts.green * platePrices.green;
+        platesTotal += plateCounts.yellow * platePrices.yellow;
+        platesTotal += plateCounts.red * platePrices.red;
+        platesTotal += plateCounts.iron * platePrices.iron;
+        
+        // 4. 饮料总费用 (遍历所有饮料条目)
+        let drinksTotal = 0;
+        const drinkItems = document.querySelectorAll('.drink-item');
+        drinkItems.forEach(item => {
+            const priceInput = item.querySelector('.drink-price');
+            if (priceInput) {
+                let priceVal = parseFloat(priceInput.value);
+                if (isNaN(priceVal)) priceVal = 0;
+                drinksTotal += priceVal;
+            }
+        });
+        
+        const grandTotal = soupPrice + seasoningFee + platesTotal + drinksTotal;
+        totalSpan.innerText = grandTotal.toFixed(2);
+    }
+
+    // 更新所有盘子数量显示 (直接从plateCounts同步)
+    function syncPlateCountsDisplay() {
+        countGreenSpan.innerText = plateCounts.green;
+        countYellowSpan.innerText = plateCounts.yellow;
+        countRedSpan.innerText = plateCounts.red;
+        countIronSpan.innerText = plateCounts.iron;
+    }
+
+    // 改变盘子数量 (type: green/yellow/red/iron, delta: +1/-1)
+    function changePlateCount(type, delta) {
+        const newVal = plateCounts[type] + delta;
+        if (newVal >= 0) {
+            plateCounts[type] = newVal;
+            syncPlateCountsDisplay();
+            computeTotal();
+        }
+    }
+
+    // 重置所有数据：盘子清零、人数=1、锅底普通、折扣68、饮料恢复默认两个（其他删除新建），数量清零总价更新
+    function resetAllData() {
+        // 重置盘子数量
+        plateCounts = { green: 0, yellow: 0, red: 0, iron: 0 };
+        syncPlateCountsDisplay();
+        
+        // 重置锅底为普通锅底
+        soupNormalRadio.checked = true;
+        soupClearRadio.checked = false;
+        
+        // 重置人数
+        peopleInput.value = '1';
+        
+        // 重置折扣为68折 (如果当前不是68，主动切换)
+        if (currentDiscount !== '68') {
+            currentDiscount = '68';
+            discountBtns.forEach(btn => {
+                if (btn.getAttribute('data-discount') === '68') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            updatePlatePriceDisplays();
+        } else {
+            // 确保样式高亮正确
+            discountBtns.forEach(btn => {
+                if (btn.getAttribute('data-discount') === '68') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            updatePlatePriceDisplays();
+        }
+        
+        // 重置饮料列表: 移除所有现有饮料项，重新添加两个默认示例（可乐和啤酒）
+        while (beverageContainer.firstChild) {
+            beverageContainer.removeChild(beverageContainer.firstChild);
+        }
+        // 创建默认饮料条目
+        const defaultDrinks = [
+            { name: "🥤 可乐", price: 5.0 },
+            { name: "🍺 青岛啤酒", price: 12.0 }
+        ];
+        defaultDrinks.forEach((drink, idx) => {
+            const drinkDiv = createDrinkItem(drink.name, drink.price);
+            beverageContainer.appendChild(drinkDiv);
+        });
+        
+        // 重新绑定饮料删除事件 (事件委托已经在父层做了，但不需要额外做，已经通过全局委托)
+        // 重算总价
+        computeTotal();
+    }
+
+    // 创建单个饮料条目 DOM (名称，价格)
+    function createDrinkItem(nameVal, priceVal) {
+        const div = document.createElement('div');
+        div.className = 'drink-item';
+        // 随机简易id没什么用，不加data-id也可以
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'drink-name';
+        nameInput.placeholder = '饮料名称';
+        nameInput.value = nameVal;
+        
+        const priceInput = document.createElement('input');
+        priceInput.type = 'number';
+        priceInput.className = 'drink-price';
+        priceInput.placeholder = '价格';
+        priceInput.value = priceVal;
+        priceInput.step = "0.5";
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'del-drink';
+        delBtn.innerText = '✕';
+        
+        div.appendChild(nameInput);
+        div.appendChild(priceInput);
+        div.appendChild(delBtn);
+        return div;
+    }
+    
+    // 添加新饮料 (带默认值)
+    function addNewDrink() {
+        const newDrink = createDrinkItem("🧋 新饮品", 0.0);
+        beverageContainer.appendChild(newDrink);
+        computeTotal();  // 新增空白饮料价格0元，不影响，但用户会修改
+    }
+
+    // 事件绑定 (委托方式监听动态元素)
+    function bindGlobalEvents() {
+        // 盘子的加减按钮委托 (利用事件捕获)
+        const platesArea = document.getElementById('platesContainer');
+        platesArea.addEventListener('click', (e) => {
+            const btn = e.target;
+            if (btn.classList && btn.classList.contains('dec-btn')) {
+                const type = btn.getAttribute('data-type');
+                if (type) changePlateCount(type, -1);
+            } else if (btn.classList && btn.classList.contains('inc-btn')) {
+                const type = btn.getAttribute('data-type');
+                if (type) changePlateCount(type, 1);
+            }
+        });
+        
+        // 监听锅底变动 + 人数变动 + 折扣切换
+        soupNormalRadio.addEventListener('change', computeTotal);
+        soupClearRadio.addEventListener('change', computeTotal);
+        peopleInput.addEventListener('input', computeTotal);
+        
+        // 折扣切换
+        discountBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const discountVal = btn.getAttribute('data-discount');
+                if (discountVal === '68' || discountVal === '58') {
+                    if (currentDiscount === discountVal) return;
+                    currentDiscount = discountVal;
+                    // 更新高亮样式
+                    discountBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updatePlatePriceDisplays();
+                    computeTotal();  // 单价改变,总价刷新
+                }
+            });
+        });
+        
+        // 饮料相关事件委托 (价格变动、删除)
+        beverageContainer.addEventListener('input', (e) => {
+            if (e.target.classList && e.target.classList.contains('drink-price')) {
+                computeTotal();
+            }
+            if (e.target.classList && e.target.classList.contains('drink-name')) {
+                // 名称变动不计价，不刷新总价也行但无影响，不过名字不会影响价钱，忽略；少一次开销
+                // 可选无操作
+            }
+        });
+        
+        beverageContainer.addEventListener('click', (e) => {
+            if (e.target.classList && e.target.classList.contains('del-drink')) {
+                const drinkItem = e.target.closest('.drink-item');
+                if (drinkItem && beverageContainer.children.length > 1) {
+                    drinkItem.remove();
+                    computeTotal();
+                } else if (drinkItem && beverageContainer.children.length === 1) {
+                    // 至少保留一个饮料条目? 用户体验: 允许删除到空，更简洁，但无饮料时也应允许，我们允许删除最后一个
+                    drinkItem.remove();
+                    computeTotal();
+                } else {
+                    drinkItem?.remove();
+                    computeTotal();
+                }
+            }
+        });
+        
+        addDrinkBtn.addEventListener('click', () => {
+            addNewDrink();
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            resetAllData();
+        });
+    }
+    
+    // 初始化页面数据，同步界面，显示正确的单价和数量
+    function initPage() {
+        // 初始套餐数量清零
+        plateCounts = { green: 0, yellow: 0, red: 0, iron: 0 };
+        syncPlateCountsDisplay();
+        currentDiscount = '68';
+        updatePlatePriceDisplays();
+        // 确保折扣高亮
+        discountBtns.forEach(btn => {
+            if (btn.getAttribute('data-discount') === '68') btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        // 从现有饮料列表获取初始值触发总价计算（保证饮料初始可乐啤酒价格正确）
+        computeTotal();
+    }
+
+    // 额外监听人数输入失去焦点 防止负数或无效
+    peopleInput.addEventListener('blur', function() {
+        let v = parseInt(this.value, 10);
+        if (isNaN(v) || v < 0) v = 0;
+        this.value = v;
+        computeTotal();
+    });
+    
+    // 监听饮料直接修改时确保浮点数合法性 (二次保障)
+    document.addEventListener('change', (e) => {
+        if (e.target.classList && e.target.classList.contains('drink-price')) {
+            let val = parseFloat(e.target.value);
+            if (isNaN(val)) e.target.value = 0;
+            else if (val < 0) e.target.value = 0;
+            computeTotal();
+        }
+    });
+    
+    // 启动
+    bindGlobalEvents();
+    initPage();
+</script>
+</body>
+</html>
